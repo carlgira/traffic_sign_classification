@@ -2,11 +2,11 @@ import src.traffic_sign_classifier as tsf
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
+class LeNETDroupOut(tsf.TrafficSignClassifier):
 
-class LeNETBasic(tsf.TrafficSignClassifier):
-
-	def __init__(self, name, data_aug=True):
-		super().__init__(name, data_aug)
+	def __init__(self, name):
+		super().__init__(name)
+		self.keep_rate_dense = 0.5
 
 	# Neural Network
 	def neural_network(self, x_data, y_data, phase):
@@ -18,8 +18,10 @@ class LeNETBasic(tsf.TrafficSignClassifier):
 
 		fc0 = flatten(conv2)
 		fc1 = tf.layers.dense(fc0, units=120, activation=tf.nn.relu)
+		fc1 = tf.layers.dropout(fc1, rate=self.keep_rate_dense, training=phase)
 
 		fc2 = tf.layers.dense(fc1, units=84, activation=tf.nn.relu)
+		fc2 = tf.layers.dropout(fc2, rate=self.keep_rate_dense, training=phase)
 
 		logits = tf.layers.dense(fc2, units=self.classes)
 
@@ -30,3 +32,7 @@ class LeNETBasic(tsf.TrafficSignClassifier):
 		training_operation = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(loss_operation)
 
 		return accuracy_operation, training_operation, loss_operation
+
+if __name__ == '__main__':
+	nn = LeNETDroupOut('lenet_dropout')
+	nn.train_nn()

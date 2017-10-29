@@ -9,21 +9,24 @@ import abc
 
 class TrafficSignClassifier:
 
-	def __init__(self):
+	def __init__(self, name, data_aug=True):
 		# Parametrizartion
 		self.learning_rate = 0.001
 		self.classes = 43
 		self.EPOCHS = 1
 		self.BATCH_SIZE = 128
 		self.saver = None
+		self.name = name
 
 		train, valid, test = self.load_dataset("../../traffic-signs-data/train.p", "../../traffic-signs-data/test.p", "../../traffic-signs-data/valid.p")
 		self.X_train, self.y_train = train['features'], train['labels']
 		self.X_validation, self.y_validation = valid['features'], valid['labels']
 		self.X_test, self.y_test = test['features'], test['labels']
 
-		X_train_aug, y_train_aug = self.create_data()
-		self.X_train, self.y_train = shuffle(X_train_aug, y_train_aug, random_state=0)
+		if data_aug:
+			self.X_train, self.y_train = self.create_data()
+
+		self.X_train, self.y_train = shuffle(self.X_train, self.y_train, random_state=0)
 
 		self.channels = self.X_train.shape[3]
 
@@ -125,8 +128,15 @@ class TrafficSignClassifier:
 		one_hot_y = tf.one_hot(y, self.classes)
 		phase = tf.placeholder(tf.bool, name='phase')
 
-		accuracy_operation, training_operation = self.neural_network(x, one_hot_y, phase)
+		accuracy_operation, training_operation, loss_operation = self.neural_network(x, one_hot_y, phase)
 		self.saver = tf.train.Saver()
+
+		tf.summary.scalar("loss", loss_operation)
+		tf.summary.scalar("accuracy", accuracy_operation)
+
+		merged_summary_op = tf.summary.merge_all()
+
+		summary_writer = tf.summary.FileWriter(self.name + '/logs', graph=tf.get_default_graph())
 
 		# Neural Network training
 		with tf.Session() as sess:
@@ -137,20 +147,19 @@ class TrafficSignClassifier:
 				for offset in range(0, num_examples, self.BATCH_SIZE):
 					end = offset + self.BATCH_SIZE
 					batch_x, batch_y = self.X_train[offset:end], self.y_train[offset:end]
-					sess.run(training_operation, feed_dict={x: batch_x, y: batch_y, phase: True})
+					_, summary = sess.run([training_operation, merged_summary_op], feed_dict={x: batch_x, y: batch_y, phase: True})
+
+					summary_writer.add_summary(summary, i * num_examples + offset)
 
 				validation_accuracy = self.evaluate(self.X_validation, self.y_validation, accuracy_operation)
 				print("EPOCH {}, Validation Accuracy = {:.3f}".format(i+1, validation_accuracy))
 
-			self.saver.save(sess, 'nn')
+			self.saver.save(sess, self.name + '/nn')
 			print("Model saved")
 
 		# Neural Netowrk test
 		with tf.Session() as sess:
-			self.saver.restore(sess, tf.train.latest_checkpoint('.'))
+			self.saver.restore(sess, tf.train.latest_checkpoint(self.name))
 
 			test_accuracy = self.evaluate(self.X_test, self.y_test, accuracy_operation)
 			print("Test Accuracy = {:.3f}".format(test_accuracy))
-
-
-

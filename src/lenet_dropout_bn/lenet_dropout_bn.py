@@ -2,24 +2,30 @@ import src.traffic_sign_classifier as tsf
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
+class LeNETDroupOutBN(tsf.TrafficSignClassifier):
 
-class LeNETBasic(tsf.TrafficSignClassifier):
-
-	def __init__(self, name, data_aug=True):
-		super().__init__(name, data_aug)
+	def __init__(self, name):
+		super().__init__(name)
+		self.keep_rate_dense = 0.5
 
 	# Neural Network
 	def neural_network(self, x_data, y_data, phase):
 		conv1 = tf.layers.conv2d(x_data, filters=6, kernel_size=[1, 1], padding='valid', activation=tf.nn.relu, kernel_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.1))
 		conv1 = tf.layers.max_pooling2d(conv1, pool_size=[2, 2], strides=2)
+		conv1 = tf.layers.batch_normalization(conv1, training=phase)
 
 		conv2 = tf.layers.conv2d(conv1, filters=16, kernel_size=[1, 1], padding='valid', activation=tf.nn.relu, kernel_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.1))
 		conv2 = tf.layers.max_pooling2d(conv2, pool_size=[2, 2], strides=2)
+		conv2 = tf.layers.batch_normalization(conv2, training=phase)
 
 		fc0 = flatten(conv2)
 		fc1 = tf.layers.dense(fc0, units=120, activation=tf.nn.relu)
+		fc1 = tf.layers.dropout(fc1, rate=self.keep_rate_dense, training=phase)
+		fc1 = tf.layers.batch_normalization(fc1, training=phase)
 
 		fc2 = tf.layers.dense(fc1, units=84, activation=tf.nn.relu)
+		fc2 = tf.layers.dropout(fc2, rate=self.keep_rate_dense, training=phase)
+		fc2 = tf.layers.batch_normalization(fc2, training=phase)
 
 		logits = tf.layers.dense(fc2, units=self.classes)
 
@@ -30,3 +36,7 @@ class LeNETBasic(tsf.TrafficSignClassifier):
 		training_operation = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(loss_operation)
 
 		return accuracy_operation, training_operation, loss_operation
+
+if __name__ == '__main__':
+	nn = LeNETDroupOutBN('lenet_dropout_bn')
+	nn.train_nn()
