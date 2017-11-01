@@ -2,7 +2,6 @@ import src.traffic_sign_classifier as tsf
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 from src.capsnet.capsLayer import CapsLayer
-import src.capsnet.config as cfg
 
 class CapsNet_Cardn(tsf.TrafficSignClassifier):
 
@@ -12,28 +11,17 @@ class CapsNet_Cardn(tsf.TrafficSignClassifier):
 	# Neural Network
 	def neural_network(self, x_data, y_data, phase):
 
-		conv1 = tf.contrib.layers.conv2d(x_data, num_outputs=8,
-									 kernel_size=9, stride=1,
-									 padding='VALID')
+		conv1 = tf.contrib.layers.conv2d(x_data, num_outputs=4, kernel_size=9, stride=1, padding='VALID')
 
 		conv1_size = int(32-9/1) + 1
-		print(conv1_size)
-
-		#assert conv1.get_shape() == [cfg.batch_size, 20, 20, 256]
-		# (?, 24, 24, 256)
-		print("conv1", conv1.get_shape())
-
 		caps1_size = int((conv1_size-9)/2.0) + 1
-		caps_neurons = caps1_size*caps1_size*8
+		caps_neurons = caps1_size*caps1_size*4
 
-		primaryCaps = CapsLayer(num_outputs=8, conv_vec_len=4, fcc_vec_len=16, caps_neurons=caps_neurons, with_routing=False, layer_type='CONV')
-		caps1 = primaryCaps(conv1, kernel_size=9, stride=2)
+		caps_layer = CapsLayer(conv_num_outputs=4, fcc_num_outputs=10, conv_vec_len=2, fcc_vec_len=16, caps_neurons=caps_neurons, batch_size=self.BATCH_SIZE)
 
-		#assert caps1.get_shape() == [cfg.batch_size, 1152, 8, 1]
-		print("caps1.shape", caps1.get_shape())
+		caps1 = caps_layer.conv_layer(conv1, kernel_size=9, stride=2)
 
-		digitCaps = CapsLayer(num_outputs=10, conv_vec_len=4, fcc_vec_len=16, caps_neurons=caps_neurons, with_routing=True, layer_type='FC')
-		caps2 = digitCaps(caps1)
+		caps2 = caps_layer.fcc_layer(caps1)
 
 		fc = flatten(caps2)
 		fc1 = tf.layers.dense(fc, units=100, activation=tf.nn.relu)
