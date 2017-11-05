@@ -10,16 +10,16 @@ class LeNETBasic(tsf.TrafficSignClassifier):
 
 	# Neural Network
 	def neural_network(self, x_data, y_data, phase):
-		conv1 = tf.layers.conv2d(x_data, filters=6, kernel_size=[5, 5], padding='valid', activation=tf.nn.relu, kernel_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.1))
+		conv1 = tf.layers.conv2d(x_data, filters=6, kernel_size=[5, 5], padding='valid', activation=tf.nn.relu)
 		maxp1 = tf.layers.max_pooling2d(conv1, pool_size=[2, 2], strides=2)
 
-		conv2 = tf.layers.conv2d(maxp1, filters=16, kernel_size=[5, 5], padding='valid', activation=tf.nn.relu, kernel_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.1))
+		conv2 = tf.layers.conv2d(maxp1, filters=16, kernel_size=[5, 5], padding='valid', activation=tf.nn.relu)
 		maxp2 = tf.layers.max_pooling2d(conv2, pool_size=[2, 2], strides=2)
 
 		fc0 = flatten(maxp2)
-		fc1 = tf.layers.dense(fc0, units=120, activation=tf.nn.relu)
+		fc1 = tf.layers.dense(fc0, units=120)
 
-		fc2 = tf.layers.dense(fc1, units=84, activation=tf.nn.relu)
+		fc2 = tf.layers.dense(fc1, units=84)
 
 		logits = tf.layers.dense(fc2, units=self.classes)
 

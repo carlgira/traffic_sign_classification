@@ -13,8 +13,8 @@ class TrafficSignClassifier:
 		# Parametrizartion
 		self.learning_rate = 0.001
 		self.classes = 43
-		self.EPOCHS = 80
-		self.BATCH_SIZE = 128
+		self.EPOCHS = 100
+		self.BATCH_SIZE = 512
 		self.saver = None
 		self.name = name
 
@@ -46,54 +46,6 @@ class TrafficSignClassifier:
 			test = pickle.load(f)
 
 		return train, valid, test
-    
-
-    def eq_Hist(self, img):
-        #Histogram Equalization
-        img2=img.copy() 
-        img2[:, :, 0] = cv2.equalizeHist(img[:, :, 0])
-        img2[:, :, 1] = cv2.equalizeHist(img[:, :, 1])
-        img2[:, :, 2] = cv2.equalizeHist(img[:, :, 2])
-        return img2
-
-    def scale_img(self, img):
-        img2=img.copy()
-        sc_y=0.4*np.random.rand()+1.0
-        img2=cv2.resize(img, None, fx=1, fy=sc_y, interpolation = cv2.INTER_CUBIC)
-        c_x,c_y, sh = int(img2.shape[0]/2), int(img2.shape[1]/2), int(img_size/2)
-        return img2
-
-
-    def rotate_img(self, img):
-        c_x,c_y = int(img.shape[0]/2), int(img.shape[1]/2)
-        ang = 30.0*np.random.rand()-15
-        Mat = cv2.getRotationMatrix2D((c_x, c_y), ang, 1.0)
-        return cv2.warpAffine(img, Mat, img.shape[:2])
-
-    def sharpen_img(self, img):
-        gb = cv2.GaussianBlur(img, (5,5), 20.0)
-        return cv2.addWeighted(img, 2, gb, -1, 0)
-    #Compute linear image transformation ing*s+m
-    def lin_img(img,s=1.0,m=0.0):
-        img2=cv2.multiply(img, np.array([s]))
-        return cv2.add(img2, np.array([m]))
-
-    #Change image contrast; s>1 - increase
-    def contr_img(self, img, s=1.0):
-        m=127.0*(1.0-s)
-        return lin_img(img, s, m)
-
-    def transform_img(self, img):
-        img2=sharpen_img(img)
-        img2=contr_img(img2, 1.5)
-        return eq_Hist(img2)
-
-    def augment_img(self, img):
-        img=contr_img(img, 1.8*np.random.rand()+0.2)
-        img=rotate_img(img)
-        img=scale_img(img)
-        return transform_img(img)    
-    
 
 	def transform_image(self, img,ang_range,shear_range,trans_range):
 		'''
@@ -141,7 +93,7 @@ class TrafficSignClassifier:
 		:return:
 		'''
 		train_hist = np.bincount(self.y_train)
-		max_count = np.max(train_hist)*1.5
+		max_count = np.max(train_hist)*2
 		X_train_aug = []
 		y_train_aug = []
 		for i in range(len(self.y_train)):
@@ -150,7 +102,7 @@ class TrafficSignClassifier:
 			X_train_aug.append(img)
 			y_train_aug.append(label)
 			for e in range(math.floor(max_count/train_hist[label])):
-				img_transformed = self.augment_img(img)
+				img_transformed = self.transform_image(img, 20, 10, 5)
 				X_train_aug.append(img_transformed)
 				y_train_aug.append(label)
 
