@@ -2,8 +2,6 @@
 
 ---
 
-This project is part of the Udacity self-driving car Nanodegree, for the construction of a neural network traffic sign classifier.
-
 The project contains the following files:
 
 - Readme.md (This file): Writeup of the project
@@ -71,71 +69,51 @@ The last model (the one used in the notebook), has the next architecture. It's a
 - Dropout, 0.75 keep probability
 - Full conected layer 43
 
+
 - Loss function, softmax cross entropy
 - Adam Optimier, learnin rate 0.001
 
-Using this model i get 96% of accuracy on the test dataset
-
-
-####4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
-
 My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
+* validation set accuracy of **0.942**
+* test set accuracy of  **0.952**
 
-If an iterative approach was chosen:
 * What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
+*The architecure of all test were based on lenet, from there it was tested with different parameters and layers*
 * How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
+*At the end the architecture used was almost the same the idea was to test how those componets behave under the same architecure*
+- The convolution it's a way to create filters to get valuable information of images
+- The polling tries to reduce the problem trying no to lose information after a convolution
+- The dropout helps with the overfiting, forcing the neural network to find several paths to a solution
 
+* Which parameters were tuned? How were they adjusted and why?
+- The size of batch size seems to have some implications, if the size was "high" (tested with 512) the training was faster, but the improvment on the accuracy was slower. If the batch size was "small" (tested with 128) the training takes more time to train, but it seems that it has to do more  backpropagations the accuracy gows up faster.
+- The learning rate was hard to tune. The default value seems a good one, at least for these dataset. It wast'n that important to increase or lower that value, the accuracy could jump a little bit or maybe goes a little faster at times but nothing conclusive. It's very likely that these value gains more importance when the training times are bigger than the 2 minutes that takes to train this neural network.
+- The keep rate for the dropout layer was interesting. When using a value of 0.5 for the lenet in the fully conected layers of 120 and 84, the accuracy at the begining starts growing very slow, until it finds a way to generalize correctly all the inputs. If using bigger full conected layers (1024 and 800 for example) the 0.5 value wast'n a problem the neurons can adapt correctly and pass the information to the next layer. Finally in final architecture a leave a 0.75 keeping probabily that behaves very well.
+
+
+* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
+- Using convolution neural network is the right choice for these kind of problems, each filter tries to get different kind of information of each image to tries to separate the 
+- Using the droput function was important to the generalization of the model and avoid overfitting. The network has to do a bigger effort to do this but at the end works better.
 
 ### Test a Model on New Images
+At the end with the new images only get 20% accuracy. Probably with more 
 
-####1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
-
-Here are five German traffic signs that I found on the web:
-
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
-
-The first image might be difficult to classify because ...
-
-####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
-
-Here are the results of the prediction:
-
-| Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
-
-
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
-
-####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
-
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
-
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
-
-
-For the second image ... 
+See the notebook to check all results
 
 ### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
-####1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
+The image used was a "Speed limit of 20 km". It seems that each filter gets some kind of information, in ones you can see the number clearly and in others the shape of the sign. Every filter is different and is able to capture some kind of information, thats why is important that it be a good number of them.
 
+I try to use the same procedure for the second layer but in this case there wast'n not a "human" information that i can deduce from them, all the filters seems very dark with few points.
+
+## Conclusions
+
+It's important to get to know the dataset you are working and realize (like in this case) that it's necesary to create a procedure of data augmenation. Because two reasons, one, to create equivalent number of number of samples for class and second, to create a good number of samples because neural networks needs big numbers of data.
+
+Tuning the parameters of the neural network is hard. It's important to understand the type of information you are procesing, the architure you are going to work, and test different scenarios based on the results of the accuracy.
+
+I choose not to use different architectures, instead i just try to focus on lenet and changing all the parameters that o could imagine, all that to understant how all those changes affect the neural network.
+
+The final accuracy was 96%, not bad but far from state of the art accuracy for this problem (is over 99%). I think is asociated with the number of EPOCHS that i choose (100 for all the test) and the learnign rate. 
+
+The accuracy on new images wast'n what i was expecting, only 20% of accuracy (2 of 10 images). Probably those three points from 96% to 99% are all the difference to get better results.
 
