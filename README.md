@@ -6,6 +6,7 @@ The project contains the following files:
 
 - Readme.md (This file): Writeup of the project
 - Traffic_Sign_Classifier.ipynb: Notebook with the python code and comments
+- Traffic_Sign_Classifier.html: Saved notebook in html
 - src: Directory with different architectures of neural networks (lenet with and without augmented data, lenet with dropout and other convnets)
 - new_images: Folder with new images to test the model
 - convent: Folder with checkpoint of the neural network
@@ -32,7 +33,7 @@ The data augmentation function applies randomly a range of image transformation 
 
 ## Neural Network Models
 
-I wanted to try to test some combinations of different neural networks to see how the changes improve the accuracy of the model.
+I wanted to try some combinations on lenet to see how the changes improve the accuracy of the model.
 
 All this networks where trained with the same parameters:
 
@@ -51,13 +52,12 @@ All this networks where trained with the same parameters:
 There are some information you can get from the final accuracy and the graphs
 
 - The accuracy improve with the use of the data augmentation, dropout layer or using more filters in convolutions.
-- The accuracy and loss when there is any data augmentation jumps a lot more that the others, combinations
+- The accuracy and loss when there is data augmentation jumps a lot more that the others combinations
 - The dropout seems to help in the model making growth of the accuracy more smooth.
-- I could use more EPOCHS to get better results 
 
 #### Architecture
 
-The last model (the one used in the notebook), has the next architecture. It's a basic lenet using more filters in the convolutions, dropout. 
+The last model (the one used in the notebook), has the next architecture. It's a basic lenet using more filters in the convolutions and dropout. 
 
 - Convolution 5x5 16 filters relu activation
 - Max polling 2x2.
@@ -81,16 +81,15 @@ My final model results were:
 - The architecture of all test were based on lenet, from there it was tested with different parameters and layers </br></br>
 
 2. How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.</br>
-At the end the architecture used was almost the same the idea was to test how those components behave under the same architecture*
 - The convolution it's a way to create filters to get valuable information of images
 - The polling tries to reduce the problem trying no to lose information after a convolution
 - The dropout helps with the overfiting, forcing the neural network to find several paths to a solution
 </br></br>
 
 3. Which parameters were tuned? How were they adjusted and why?
-- The size of batch size seems to have some implications, if the size was "high" (tested with 512) the training was faster, but the improvement on the accuracy was slower. If the batch size was "small" (tested with 128) the training takes more time to train, but it seems that it has to do more  backpropagations the accuracy grows up faster.
-- The learning rate was hard to tune. The default value seems a good one, at least for these dataset. It wast'n that important to increase or lower that value, the accuracy could jump a little bit or maybe goes a little faster at times but nothing conclusive. It's very likely that these value gains more importance when the training times are bigger than the 2 minutes that takes to train this neural network.
-- The keep rate for the dropout layer was interesting. When using a value of 0.5 for the lenet in the fully connected layers of 120 and 84, the accuracy at the beginning starts growing very slow, until it finds a way to generalize correctly all the inputs. If using bigger full connected layers (1024 and 800 for example) the 0.5 value wast'n a problem the neurons can adapt correctly and pass the information to the next layer. Finally in final architecture a leave a 0.75 keeping probably that behaves very well.
+- The size of batch size seems to have some implications, if the size was "high" (tested with 512) the training was faster, but the improvement on the accuracy was slower. If the batch size was "small" (tested with 128) the training takes more time to train, but it seems that it has to do more  backpropagations and the accuracy grows up faster.
+- The learning rate was hard to tune. The default value seems a good one. It wast'n that important to increase or lower that value, the accuracy could jump a little bit or maybe goes a little faster at times but nothing conclusive. It's very likely that these value gains more importance when the training times are bigger than the 2 minutes that takes to train this neural network.
+- The keep rate for the dropout layer was interesting. When using a value of 0.5 for the lenet in the fully connected layers of 120 and 84, the accuracy at the beginning starts growing very slow, until it finds a way to generalize correctly all the inputs. If using bigger full connected layers (1024 and 800 for example) the 0.5 value wast'n a problem the neurons can adapt correctly and pass the information to the next layer. In final architecture i leave a 0.75 as keeping probability that behaves well.
 </br></br>
 
 4. What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
@@ -98,14 +97,14 @@ At the end the architecture used was almost the same the idea was to test how th
 - Using the dropout function was important to the generalization of the model and avoid overfitting. The network has to do a bigger effort to do this but at the end works better.</br></br>
 
 ### Test a Model on New Images
-At the end with the new images only get 20% accuracy. Probably with more 
+At the end with the new images only get 20% accuracy. Probably getting closer to 100% accuracy in training results in big  difference to get better results.
 
-See the notebook to check all results
+See the notebook to check all results.
 
 ### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
 The image used was a "Speed limit of 20 km". It seems that each filter gets some kind of information, in ones you can see the number clearly and in others the shape of the sign. Every filter is different and is able to capture some kind of information, thats why is important that it be a good number of them.
 
-I try to use the same procedure for the second layer but in this case there wast'n not a "human" information that i can deduce from them, all the filters seems very dark with few points.
+I try to use the same procedure for the second layer but in this case there wast'n a "human" information that i can deduce from them, all the filters seems very dark with few points.
 
 ## Conclusions
 
