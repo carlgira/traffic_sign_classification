@@ -108,13 +108,12 @@ I try to use the same procedure for the second layer but in this case there wast
 
 ## Conclusions
 
-It's important to get to know the dataset you are working and realize (like in this case) that it's necessary to create a procedure of data augmentation. Because two reasons, one, to create equivalent number of number of samples for class and second, to create a good number of samples because neural networks needs big numbers of data.
+It's important to get to know the dataset you are working and realize (like in this case) that it's necessary to create a procedure of data augmentation. For two reasons, one, to create equivalent number  of samples for class and second, to create a good number of samples because neural networks needs big datasets to generalize correclty..
 
 Tuning the parameters of the neural network is hard. It's important to understand the type of information you are processing, the architecture you are going to work, and test different scenarios based on the results of the accuracy.
 
-I choose not to use different architectures, instead i just try to focus on lenet and changing all the parameters that o could imagine, all that to understand how all those changes affect the neural network.
+I choose not to use different architectures, instead i just try to focus on lenet and changing all the parameters that i could imagine, all that to understand how all those changes affect the neural network.
 
 The final accuracy was 96%, not bad but far from state of the art accuracy for this problem (is over 99%). I think is associated with the number of EPOCHS that i choose (100 for all the test) and the learning rate. 
 
-The accuracy on new images wast'n what i was expecting, only 20% of accuracy (2 of 10 images). Probably those three points from 96% to 99% are all the difference to get better results.
-
+The accuracy on new images wast'n what i was expecting, only 20% of accuracy (2 of 10 images). Probably those three points from 96% to 99% are a big difference to get better results.
