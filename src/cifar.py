@@ -7,7 +7,6 @@ import cv2
 import abc
 from keras.datasets import cifar10
 from sklearn.model_selection import train_test_split
-X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=0.3, random_state=42, stratify = y_train)
 
 class Cifar:
 
