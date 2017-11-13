@@ -1,0 +1,169 @@
+import pickle
+import tensorflow as tf
+from sklearn.utils import shuffle
+import math
+import numpy as np
+import cv2
+import abc
+from keras.datasets import cifar10
+from sklearn.model_selection import train_test_split
+X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=0.3, random_state=42, stratify = y_train)
+
+class Cifar:
+
+	def __init__(self, name, data_aug=True):
+		# Parametrizartion
+		self.learning_rate = 0.001
+		self.classes = 10
+		self.EPOCHS = 100
+		self.BATCH_SIZE = 512
+		self.saver = None
+		self.name = name
+
+		(self.X_train, self.y_train), (self.X_test, self.y_test) = cifar10.load_data()
+
+		self.y_train = self.y_train.reshape(-1)
+		self.y_test = self.y_test.reshape(-1)
+
+		self.X_train, self.X_valid, self.y_train, self.y_valid = train_test_split(self.X_train, self.y_train, test_size=0.3, random_state=42, stratify =self.y_train)
+
+		if data_aug:
+			self.X_train, self.y_train = self.create_data()
+
+		self.X_train, self.y_train = shuffle(self.X_train, self.y_train, random_state=0)
+
+		self.channels = self.X_train.shape[3]
+
+	def load_dataset(self, training_file, validation_file, testing_file):
+		'''
+		Function to load the dataset
+		:param training_file:
+		:param validation_file:
+		:param testing_file:
+		:return:
+		'''
+		with open(training_file, mode='rb') as f:
+			train = pickle.load(f)
+		with open(validation_file, mode='rb') as f:
+			valid = pickle.load(f)
+		with open(testing_file, mode='rb') as f:
+			test = pickle.load(f)
+
+		return train, valid, test
+
+	def transform_image(self, img,ang_range,shear_range,trans_range):
+		'''
+		Function for data augmentation
+		:param img: Image
+		:param ang_range: Range of angles for rotation
+		:param shear_range: Range of values to apply affine transform to
+		:param trans_range: Range of values to apply translations over.
+		:return:
+		'''
+
+		# Rotation
+		ang_rot = np.random.uniform(ang_range)-ang_range/2
+		rows,cols,ch = img.shape
+		Rot_M = cv2.getRotationMatrix2D((cols/2,rows/2),ang_rot,1)
+
+		# Translation
+		tr_x = trans_range*np.random.uniform()-trans_range/2
+		tr_y = trans_range*np.random.uniform()-trans_range/2
+		Trans_M = np.float32([[1,0,tr_x],[0,1,tr_y]])
+
+		# Shear
+		pts1 = np.float32([[5,5],[20,5],[5,20]])
+		pt1 = 5+shear_range*np.random.uniform()-shear_range/2
+		pt2 = 20+shear_range*np.random.uniform()-shear_range/2
+
+		# Brightness
+		pts2 = np.float32([[pt1,5],[pt2,pt1],[5,pt2]])
+
+		shear_M = cv2.getAffineTransform(pts1,pts2)
+
+		img = cv2.warpAffine(img,Rot_M,(cols,rows))
+		img = cv2.warpAffine(img,Trans_M,(cols,rows))
+		img = cv2.warpAffine(img,shear_M,(cols,rows))
+
+		return img
+
+	@abc.abstractmethod
+	def neural_network(self, x_data, y_data, phase):
+		pass
+
+	def create_data(self):
+		'''
+		Method for data augmentation
+		:return:
+		'''
+		train_hist = np.bincount(self.y_train)
+		max_count = np.max(train_hist)*2
+		X_train_aug = []
+		y_train_aug = []
+		for i in range(len(self.y_train)):
+			img = self.X_train[i]
+			label = self.y_train[i]
+			X_train_aug.append(img)
+			y_train_aug.append(label)
+			for e in range(math.floor(max_count/train_hist[label])):
+				img_transformed = self.transform_image(img, 20, 10, 5)
+				X_train_aug.append(img_transformed)
+				y_train_aug.append(label)
+
+		return np.array(X_train_aug), np.array(y_train_aug)
+
+	def evaluate(self, X_data, y_data, accuracy_operation):
+		'''
+		Function to get accuracy of input data
+		'''
+		num_examples = len(X_data)
+		total_accuracy = 0
+		sess = tf.get_default_session()
+		for offset in range(0, num_examples, self.BATCH_SIZE):
+			batch_x, batch_y = X_data[offset:offset + self.BATCH_SIZE], y_data[offset:offset + self.BATCH_SIZE]
+			accuracy = sess.run(accuracy_operation, feed_dict={'x:0': batch_x, 'y:0': batch_y, 'phase:0': False})
+			total_accuracy += (accuracy * len(batch_x))
+		return total_accuracy / num_examples
+
+	def train_nn(self):
+		# Neural Netowrk training
+		x = tf.placeholder(tf.float32, (None, 32, 32, self.channels), name='x')
+		y = tf.placeholder(tf.int32, (None), name='y')
+		one_hot_y = tf.one_hot(y, self.classes)
+		phase = tf.placeholder(tf.bool, name='phase')
+
+		accuracy_operation, training_operation, loss_operation = self.neural_network(x, one_hot_y, phase)
+		self.saver = tf.train.Saver()
+
+		tf.summary.scalar("loss", loss_operation)
+		tf.summary.scalar("accuracy", accuracy_operation)
+
+		merged_summary_op = tf.summary.merge_all()
+
+		summary_writer = tf.summary.FileWriter(self.name + '/logs', graph=tf.get_default_graph())
+
+		# Neural Network training
+		with tf.Session() as sess:
+			sess.run(tf.global_variables_initializer())
+			num_examples = len(self.X_train)
+			print("Training...")
+			for i in range(self.EPOCHS):
+				for offset in range(0, num_examples, self.BATCH_SIZE):
+					end = offset + self.BATCH_SIZE
+					batch_x, batch_y = self.X_train[offset:end], self.y_train[offset:end]
+					_, summary = sess.run([training_operation, merged_summary_op], feed_dict={x: batch_x, y: batch_y, phase: True})
+
+					summary_writer.add_summary(summary, i * num_examples + offset)
+
+				validation_accuracy = self.evaluate(self.X_validation, self.y_validation, accuracy_operation)
+				print("EPOCH {}, Validation Accuracy = {:.3f}".format(i+1, validation_accuracy))
+
+			self.saver.save(sess, self.name + '/nn')
+			print("Model saved")
+
+		# Neural Netowrk test
+		with tf.Session() as sess:
+			self.saver.restore(sess, tf.train.latest_checkpoint(self.name))
+
+			test_accuracy = self.evaluate(self.X_test, self.y_test, accuracy_operation)
+			print("Test Accuracy = {:.3f}".format(test_accuracy))
