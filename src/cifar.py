@@ -24,7 +24,7 @@ class Cifar:
 		self.y_train = self.y_train.reshape(-1)
 		self.y_test = self.y_test.reshape(-1)
 
-		self.X_train, self.X_valid, self.y_train, self.y_valid = train_test_split(self.X_train, self.y_train, test_size=0.3, random_state=42, stratify =self.y_train)
+		self.X_train, self.X_validation, self.y_train, self.y_validation = train_test_split(self.X_train, self.y_train, test_size=0.3, random_state=42, stratify =self.y_train)
 
 		if data_aug:
 			self.X_train, self.y_train = self.create_data()
