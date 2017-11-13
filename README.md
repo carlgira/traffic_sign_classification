@@ -7,7 +7,7 @@ The project contains the following files:
 - Readme.md (This file): Writeup of the project
 - Traffic_Sign_Classifier.ipynb: Notebook with the python code and comments
 - Traffic_Sign_Classifier.html: Saved notebook in html
-- src: Directory with different architectures of neural networks (lenet with and without augmented data, lenet with dropout and other convnets)
+- src: Directory with different parametrization for lenet 
 - new_images: Folder with new images to test the model
 - convent: Folder with checkpoint of the neural network
 - signnames.csv: CSV file with labels id and descriptions.
@@ -29,7 +29,7 @@ The data augmentation function applies randomly a range of image transformation 
 - Rotation
 - Translation
 - Image shear
-- Brightness change
+- Brightness
 
 ## Neural Network Models
 
@@ -52,7 +52,7 @@ All this networks where trained with the same parameters:
 There are some information you can get from the final accuracy and the graphs
 
 - The accuracy improve with the use of the data augmentation, dropout layer or using more filters in convolutions.
-- The accuracy and loss when there is data augmentation jumps a lot more that the others combinations
+- The accuracy and loss when there is data augmentation jumps a lot more than the others combinations
 - The dropout seems to help in the model making growth of the accuracy more smooth.
 
 #### Architecture
