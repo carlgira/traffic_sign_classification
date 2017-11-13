@@ -2,7 +2,7 @@ import src.cifar as cifar
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
-class CifarConvNet(cifar.TrafficSignClassifier):
+class CifarConvNet(cifar.Cifar):
 
 	def __init__(self, name):
 		super().__init__(name)
