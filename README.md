@@ -31,6 +31,8 @@ The data augmentation function applies randomly a range of image transformation 
 - Image shear
 - Brightness
 
+*Grayscale transformation was tried but no improvement was achieved*
+
 ## Neural Network Models
 
 I wanted to try some combinations on lenet to see how the changes improve the accuracy of the model.
